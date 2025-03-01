@@ -1,15 +1,12 @@
 #!/bin/bash
 
 del_data="
-feeds/luci/applications/luci-app-passwall
 feeds/luci/applications/luci-app-wechatpush
-feeds/luci/applications/luci-app-smartdns
 feeds/luci/applications/luci-app-serverchan
 feeds/packages/net/brook
 feeds/packages/net/dns2socks
 feeds/packages/net/microsocks
 feeds/packages/net/pdnsd-alt
-feeds/packages/net/v2ray-geodata
 feeds/packages/net/naiveproxy
 feeds/packages/net/shadowsocks-rust
 feeds/packages/net/shadowsocksr-libev
@@ -27,7 +24,6 @@ feeds/packages/net/dns2tcp
 feeds/packages/net/tcping
 feeds/packages/net/hysteria
 feeds/packages/net/tuic-client
-feeds/packages/net/smartdns
 feeds/packages/net/ipt2socks
 feeds/packages/net/xray-core
 feeds/packages/net/cdnspeedtest
@@ -100,41 +96,6 @@ sed -i 's/;Listen = 0.0.0.0:1688/Listen = 0.0.0.0:1688/g' feeds/packages/net/vlm
 sed -i 's/ -L \[::\]:1688//g' feeds/luci/applications/luci-app-vlmcsd/root/etc/init.d/kms
 echo -e "\n#Windows 10/ Windows 11 KMS 安装激活密钥\n#Windows 10/11 Pro：W269N-WFGWX-YVC9B-4J6C9-T83GX\n#Windows 10/11 Enterprise：NPPR9-FWDCX-D2C8J-H872K-2YT43\n#Windows 10/11 Pro for Workstations：NRG8B-VKK3Q-CXVCJ-9G2XF-6Q84J\n" >> feeds/packages/net/vlmcsd/files/vlmcsd.ini
 
-# v2ray-geodata
-GEOIP_VER=$(echo -n `curl -sL https://api.github.com/repos/Loyalsoldier/v2ray-rules-dat/releases/latest | jq -r .tag_name`)
-GEOIP_HASH=$(echo -n `curl -sL https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/$GEOIP_VER/geoip.dat.sha256sum | awk '{print $1}'`)
-GEOSITE_VER=$GEOIP_VER
-GEOSITE_HASH=$(echo -n `curl -sL https://github.com/Loyalsoldier/v2ray-rules-dat/releases/download/$GEOSITE_VER/geosite.dat.sha256sum | awk '{print $1}'`)
-sed -i '/HASH:=/d' package/custom/passwall-packages/v2ray-geodata/Makefile
-
-sed -i 's/GEOIP_VER:=.*/GEOIP_VER:='"$GEOIP_VER"'/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-sed -i 's/https:\/\/github.com\/v2fly\/geoip/https:\/\/github.com\/Loyalsoldier\/v2ray-rules-dat/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-sed -i '/FILE:=$(GEOIP_FILE)/a\\tHASH:='"$GEOIP_HASH"'' package/custom/passwall-packages/v2ray-geodata/Makefile
-
-sed -i 's/https:\/\/github.com\/v2fly\/domain-list-community/https:\/\/github.com\/Loyalsoldier\/v2ray-rules-dat/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-sed -i 's/GEOSITE_VER:=.*/GEOSITE_VER:='"$GEOSITE_VER"'/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-sed -i 's/dlc.dat/geosite.dat/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-sed -i '/FILE:=$(GEOSITE_FILE)/a\\tHASH:='"$GEOSITE_HASH"'' package/custom/passwall-packages/v2ray-geodata/Makefile
-
-sed -i 's/URL:=https:\/\/www.v2fly.org/URL:=https:\/\/github.com\/Loyalsoldier\/v2ray-rules-dat/g' package/custom/passwall-packages/v2ray-geodata/Makefile
-
-# smartdns
-SMARTDNS_JSON=$(curl -sL -H "${headers}" https://api.github.com/repos/pymumu/smartdns/commits)
-SMARTDNS_VER=$(echo ${SMARTDNS_JSON} | jq -r .[0].commit.committer.date | awk -F "T" '{print $1}')
-SMARTDNS_SHA=$(echo ${SMARTDNS_JSON} | jq -r .[0].sha)
-
-curl -sL -o /tmp/smartdns-${SMARTDNS_SHA}.tar.gz https://codeload.github.com/pymumu/smartdns/tar.gz/${SMARTDNS_SHA}
-SMARTDNS_PKG_SHA=$(sha256sum /tmp/smartdns-${SMARTDNS_SHA}.tar.gz | awk '{print $1}')
-rm -rf /tmp/smartdns-${SMARTDNS_SHA}.tar.gz
-
-sed -i 's/PKG_VERSION:=.*/PKG_VERSION:='${SMARTDNS_SHA}'/g' package/custom/smartdns/Makefile
-sed -i 's/PKG_SOURCE_PROTO:=git/PKG_SOURCE:=$(PKG_NAME)-$(PKG_VERSION).tar.gz/g' package/custom/smartdns/Makefile
-sed -i 's/PKG_SOURCE_URL:=.*/PKG_SOURCE_URL:=https:\/\/codeload.github.com\/pymumu\/smartdns\/tar.gz\/$(PKG_VERSION)?/g' package/custom/smartdns/Makefile
-sed -i '/PKG_SOURCE_VERSION:=.*/d' package/custom/smartdns/Makefile
-sed -i 's/PKG_MIRROR_HASH:=.*/PKG_HASH:='${SMARTDNS_PKG_SHA}'/g' package/custom/smartdns/Makefile
-sed -i 's/PKG_VERSION:=.*/PKG_VERSION:='${SMARTDNS_VER}'/g' package/custom/luci-app-smartdns/Makefile
-sed -i 's/..\/..\/luci.mk/$(TOPDIR)\/feeds\/luci\/luci.mk/g' package/custom/luci-app-smartdns/Makefile
-
 # default-settings
 Build_Date=R`date "+%y.%m.%d"`
 sed -i '/exit 0/i\sed -i "s\/DISTRIB_REVISION=.*\/DISTRIB_REVISION='"'${Build_Date}'"'\/g" \/etc\/openwrt_release' package/emortal/default-settings/files/99-default-settings
@@ -144,3 +105,8 @@ sed -i '/exit 0/i\echo "net.netfilter.nf_conntrack_max=65535" >> \/etc\/sysctl.d
 
 # Lan IP
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
+
+# 添加Nikki相关包配置到.config
+if [ -f .config ]; then
+    echo -e "\nCONFIG_PACKAGE_nikki=y\nCONFIG_PACKAGE_luci-app-nikki=y\nCONFIG_PACKAGE_luci-i18n-nikki-zh-cn=y" >> .config
+fi
