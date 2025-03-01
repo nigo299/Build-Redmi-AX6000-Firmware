@@ -6,5 +6,5 @@ git clone https://github.com/hubbylei/openwrt-cdnspeedtest -b master package/cus
 git clone https://github.com/hubbylei/luci-app-cloudflarespeedtest -b main package/custom/luci-app-cloudflarespeedtest
 git clone https://github.com/openwrt/packages -b master tmp/packages
 
-# 添加Nikki feed源
-echo "src-git nikki https://github.com/nikkinikki-org/OpenWrt-nikki.git" >> feeds.conf.default
+# 直接克隆Nikki代码库
+git clone https://github.com/nikkinikki-org/OpenWrt-nikki.git -b main package/nikki
