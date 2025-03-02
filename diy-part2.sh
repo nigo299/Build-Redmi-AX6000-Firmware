@@ -34,6 +34,10 @@ target/linux/mediatek/patches-5.4/0504-macsec-revert-async-support.patch
 target/linux/mediatek/patches-5.4/0005-dts-mt7622-add-gsw.patch
 target/linux/mediatek/patches-5.4/0993-arm64-dts-mediatek-Split-PCIe-node-for-MT2712-MT7622.patch
 target/linux/mediatek/patches-5.4/1024-pcie-add-multi-MSI-support.patch
+feeds/luci/applications/luci-app-brook-server
+feeds/luci/applications/luci-app-microsocks
+feeds/luci/applications/luci-app-mwan3helper
+feeds/luci/applications/luci-app-naiveproxy
 "
 
 for data in ${del_data};
@@ -106,9 +110,15 @@ sed -i '/exit 0/i\echo "net.netfilter.nf_conntrack_max=65535" >> \/etc\/sysctl.d
 # Lan IP
 sed -i 's/192.168.1.1/192.168.10.1/g' package/base-files/files/bin/config_generate
 
-# 添加Nikki到.config
+# Add Nikki package configuration to .config
 cat >> .config <<EOF
 CONFIG_PACKAGE_nikki=y
 CONFIG_PACKAGE_luci-app-nikki=y
 CONFIG_PACKAGE_luci-i18n-nikki-zh-cn=y
+
+# Ensure these problematic packages are disabled
+# CONFIG_PACKAGE_luci-app-brook-server is not set
+# CONFIG_PACKAGE_luci-app-microsocks is not set
+# CONFIG_PACKAGE_luci-app-mwan3helper is not set
+# CONFIG_PACKAGE_luci-app-naiveproxy is not set
 EOF
